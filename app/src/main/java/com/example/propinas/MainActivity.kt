@@ -5,6 +5,7 @@ package com.example.propinas
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -59,9 +60,11 @@ fun TipTimeScreen() {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         var amountInput by remember { mutableStateOf("") }
+        var tipInput by remember { mutableStateOf("") }
 
         val amount = amountInput.toDoubleOrNull() ?: 0.0
-        val tip = calculateTip(amount)
+        val tipPercent = tipInput.toDoubleOrNull() ?: 0.0
+        val tip = calculateTip(amount, tipPercent)
 
         Text(
             text = stringResource(R.string.calculate_tip),
@@ -70,8 +73,14 @@ fun TipTimeScreen() {
         )
         Spacer(Modifier.height(16.dp))
         EditNumberField(
+            label = R.string.bill_amount,
             value = amountInput,
             onValueChange = { amountInput = it }
+        )
+        EditNumberField(
+            label = R.string.how_was_the_service,
+            value = tipInput,
+            onValueChange = { tipInput = it }
         )
         Spacer(Modifier.height(24.dp))
         Text(
@@ -85,15 +94,17 @@ fun TipTimeScreen() {
 
 @Composable
 fun EditNumberField(
+    @StringRes label: Int,
     value: String,
-    onValueChange: (String) -> Unit
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     TextField(
         modifier = Modifier.fillMaxWidth(),
         value = value,
         onValueChange = onValueChange,
 
-        label = { Text(stringResource(R.string.cost_of_service)) },
+        label = { Text(stringResource(label)) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     )
