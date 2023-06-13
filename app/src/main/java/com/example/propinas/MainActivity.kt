@@ -28,6 +28,7 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +45,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.propinas.ui.PropinasViewModel
 import com.example.propinas.ui.theme.PropinasTheme
 import java.text.NumberFormat
 
@@ -66,19 +69,14 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun TipTimeScreen() {
+fun TipTimeScreen(    PropinasViewModel: PropinasViewModel = viewModel()
+) {
+    val propinasUiState by PropinasViewModel.propinasUiState.collectAsState()
+
     Column(
         modifier = Modifier.padding(32.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        var amountInput by remember { mutableStateOf("") }
-        var tipInput by remember { mutableStateOf("") }
-        var roundUp by remember { mutableStateOf(false) }
-
-        val amount = amountInput.toDoubleOrNull() ?: 0.0
-        val tipPercent = tipInput.toDoubleOrNull() ?: 0.0
-        val tip = calculateTip(amount, tipPercent, roundUp)
-
         val focusManager = LocalFocusManager.current //Non faría falla, está por documentación
 
         Text(
@@ -96,8 +94,8 @@ fun TipTimeScreen() {
             keyboardActions = KeyboardActions( //Non faría falla
                 onNext = { focusManager.moveFocus(FocusDirection.Down) }
             ),
-            value = amountInput,
-            onValueChange = { amountInput = it }
+            value = propinasUiState.amountInput,
+            onValueChange = { propinasUiState.amountInput = it }
         )
         EditNumberField(
             label = R.string.how_was_the_service,
@@ -108,13 +106,16 @@ fun TipTimeScreen() {
             keyboardActions = KeyboardActions( //Non faría falla
                 onNext = { focusManager.clearFocus() }
             ),
-            value = tipInput,
-            onValueChange = { tipInput = it }
+            value = propinasUiState.tipInput,
+            onValueChange = { propinasUiState.tipInput = it }
         )
-        RoundTheTipRow(roundUp = roundUp, onRoundUpChanged = { roundUp = it })
+        RoundTheTipRow(
+            roundUp = propinasUiState.roundUp,
+            onRoundUpChanged = { propinasUiState.roundUp = it }
+        )
         Spacer(Modifier.height(24.dp))
         Text(
-            text = stringResource(R.string.tip_amount, tip),
+            text = stringResource(R.string.tip_amount, PropinasViewModel.tip),
             modifier = Modifier.align(Alignment.CenterHorizontally),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
@@ -122,6 +123,7 @@ fun TipTimeScreen() {
     }
 }
 
+//@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditNumberField(
     @StringRes label: Int,
@@ -129,7 +131,6 @@ fun EditNumberField(
     keyboardActions: KeyboardActions, //Non faría falla
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
 ) {
     TextField(
         modifier = Modifier.fillMaxWidth(),
@@ -167,17 +168,6 @@ fun RoundTheTipRow(
             ),
         )
     }
-}
-
-private fun calculateTip(
-    amount: Double,
-    tipPercent: Double = 15.0,
-    roundUp: Boolean,
-): String {
-    var tip = tipPercent / 100 * amount
-    if (roundUp)
-        tip = kotlin.math.ceil(tip)
-    return NumberFormat.getCurrencyInstance().format(tip)
 }
 
 @Preview(showBackground = true)
