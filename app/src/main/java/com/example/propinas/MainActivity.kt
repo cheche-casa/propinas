@@ -46,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.propinas.ui.PropinasUiState
 import com.example.propinas.ui.PropinasViewModel
 import com.example.propinas.ui.theme.PropinasTheme
 import java.text.NumberFormat
@@ -95,7 +96,7 @@ fun TipTimeScreen(    PropinasViewModel: PropinasViewModel = viewModel()
                 onNext = { focusManager.moveFocus(FocusDirection.Down) }
             ),
             value = propinasUiState.amountInput,
-            onValueChange = { propinasUiState.amountInput = it }
+            onValueChange = { PropinasViewModel.updateAmountInput(it) }
         )
         EditNumberField(
             label = R.string.how_was_the_service,
@@ -107,11 +108,11 @@ fun TipTimeScreen(    PropinasViewModel: PropinasViewModel = viewModel()
                 onNext = { focusManager.clearFocus() }
             ),
             value = propinasUiState.tipInput,
-            onValueChange = { propinasUiState.tipInput = it }
+            onValueChange = { PropinasViewModel.updateTipInput(it) }
         )
         RoundTheTipRow(
             roundUp = propinasUiState.roundUp,
-            onRoundUpChanged = { propinasUiState.roundUp = it }
+            onRoundUpChanged = { PropinasViewModel.updateRoundUp(it) }
         )
         Spacer(Modifier.height(24.dp))
         Text(
